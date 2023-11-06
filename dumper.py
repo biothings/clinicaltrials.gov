@@ -47,7 +47,7 @@ class ClinicalTrialsGovDumper(HTTPDumper):
         next_page = None
 
         for page in range(ceil(total_studies / self.PAGE_SIZE)):
-            logger.info("Handling document #:", page)
+            logger.info(f"Handling document #{page}")
             payload = {
                 "format": "json",
                 "pageSize": str(self.PAGE_SIZE),
