@@ -67,7 +67,8 @@ def _load_studies():
 
     request_delay = 1 / 3  #  <= 3 Requests per second
 
-    for _ in range(ceil(total_studies / 1000)):
+    for doc_idx in range(ceil(total_studies / 1000)):
+        logger.debug(f'Processing document #{doc_idx + 1}')
         payload = (
             {"format": "json", "pageSize": "1000", "pageToken": f"{nextPage}"}
             if nextPage
