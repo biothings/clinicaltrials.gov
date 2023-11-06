@@ -74,7 +74,7 @@ def _load_studies():
             if nextPage
             else {"format": "json", "pageSize": "1000"}
         )
-        data = requests.get("https://clinicaltrials.gov/api/v2/studies", params=payload)
+        data = requests.get("https://clinicaltrials.gov/api/v2/studies", params=payload, timeout=5.0)
         studies = data.json()
 
         aggregated_studies.extend(studies["studies"])
