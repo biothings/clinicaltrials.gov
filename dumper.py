@@ -20,7 +20,8 @@ class ClinicalTrialsDumper(HTTPDumper):
 
     def create_todump_list(self, force=False):
         total_studies = self.get_total_studies()
-        self.release = str(total_studies)  # Use total studies as the release version
+        resp = requests.get("https://clinicaltrials.gov/api/v2/version").json()
+        self.release = resp["dataTimestamp"].split("T")[0]
 
         if force or not self.current_release or int(self.release) > int(self.current_release):
             self.to_dump.append({
