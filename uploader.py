@@ -22,8 +22,9 @@ class ClinicalTrialsGovUploader(biothings.hub.dataload.uploader.BaseSourceUpload
 
     def load_data(self, data_folder):
         self.logger.info("Load data from directory: '%s'" % data_folder)
-        infile = os.path.join(data_folder, "clinicaltrials_gov.ndjson")
+        infile = os.path.join(data_folder, "clinical_trials.json")  # Corrected file name
         assert os.path.exists(infile)
         with open(infile, "r") as f:
-            for line in f:
-                yield json.loads(line)
+            data = json.load(f)  # Read the entire JSON file as a list
+            for entry in data:
+                yield entry
