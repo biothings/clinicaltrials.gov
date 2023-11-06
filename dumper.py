@@ -58,7 +58,7 @@ class ClinicalTrialsGovDumper(HTTPDumper):
                 data = requests.get(remoteurl, params=payload, headers=headers)
             except Exception as e:
                 logger.error(f"Encountered error: {e}, retrying (1) more time...")
-                 data = requests.get(remoteurl, params=payload, headers=headers)
+                data = requests.get(remoteurl, params=payload, headers=headers)
                 
             studies = data.json()
 
