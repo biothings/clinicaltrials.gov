@@ -8,6 +8,14 @@ from config import DATA_ARCHIVE_ROOT
 
 from biothings.hub.dataload.dumper import HTTPDumper
 
+try:
+    from biothings import config
+    logger = config.logger
+except ImportError:
+    import logging
+    logger = logging.getLogger(__name__)
+
+
 class ClinicalTrialsGovDumper(HTTPDumper):
     SRC_NAME = "clinicaltrials_gov"
     SRC_ROOT_FOLDER = os.path.join(DATA_ARCHIVE_ROOT, SRC_NAME)
