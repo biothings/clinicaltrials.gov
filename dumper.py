@@ -55,7 +55,7 @@ class ClinicalTrialsGovDumper(HTTPDumper):
 
             next_page = studies["nextPageToken"]
 
-            time.sleep(self.REQUEST_DELAY)
+            # time.sleep(self.REQUEST_DELAY)
 
         with open(localfile, "w") as fout:
             json.dump(aggregated_studies, fout)
