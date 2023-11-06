@@ -16,11 +16,6 @@ except ImportError:
     logger = logging.getLogger(__name__)
 
 
-__all__ = [
-    "ClinicalTrialsGovDumper",
-]
-
-
 class ClinicalTrialsGovDumper(APIDumper):
     SRC_NAME = "clinicaltrials_gov"
     SRC_ROOT_FOLDER = os.path.join(DATA_ARCHIVE_ROOT, SRC_NAME)
