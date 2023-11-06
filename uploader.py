@@ -8,7 +8,7 @@ biothings.config_for_app(config)
 import biothings.hub.dataload.uploader
 
 
-class ClinicalTrialsGovUploader(biothings.hub.dataload.uploader.BaseSourceUploader):
+class ClinicalTrialsUploader(biothings.hub.dataload.uploader.BaseSourceUploader):
     name = "clinicaltrials_gov"
     __metadata__ = {
         "src_meta": {
