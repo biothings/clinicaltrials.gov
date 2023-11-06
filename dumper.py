@@ -5,7 +5,7 @@ from math import ceil
 
 from biothings.hub.dataload.dumper import HTTPDumper
 
-class ClinicalTrialsDumper(HTTPDumper):
+class ClinicalTrialsGovDumper(HTTPDumper):
     SRC_NAME = "clinicaltrials_gov"
     SRC_ROOT_FOLDER = os.path.join(DATA_ARCHIVE_ROOT, SRC_NAME)
     BASE_URL = "https://clinicaltrials.gov/api/v2/studies"
