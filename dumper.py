@@ -29,7 +29,7 @@ class ClinicalTrialsGovDumper(APIDumper):
     def get_release():
         resp = requests.get("https://clinicaltrials.gov/api/v2/version").json()
         # Removes time of day from UTC timestamp
-        release = resp["dataTimeStamp"].split("T")[0]
+        release = resp["dataTimestamp"].split("T")[0]
         return release
 
     @staticmethod
