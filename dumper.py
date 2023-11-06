@@ -53,7 +53,13 @@ class ClinicalTrialsGovDumper(HTTPDumper):
                 "pageSize": str(self.PAGE_SIZE),
                 "pageToken": str(next_page) if next_page else None
             }
-            data = requests.get(remoteurl, params=payload, headers=headers)
+            
+            try:
+                data = requests.get(remoteurl, params=payload, headers=headers)
+            except Exception as e:
+                logger.error(f"Encountered error: {e}, retrying (1) more time...)
+                 data = requests.get(remoteurl, params=payload, headers=headers)
+                
             studies = data.json()
 
             aggregated_studies.extend(studies["studies"])
