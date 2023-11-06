@@ -2,6 +2,7 @@ import os
 import time
 import requests
 from math import ceil
+import json
 
 from config import DATA_ARCHIVE_ROOT
 
@@ -21,7 +22,6 @@ class ClinicalTrialsGovDumper(HTTPDumper):
         return total_studies
 
     def create_todump_list(self, force=False):
-        total_studies = self.get_total_studies()
         resp = requests.get("https://clinicaltrials.gov/api/v2/version").json()
         self.release = resp["dataTimestamp"].split("T")[0]
 
@@ -33,6 +33,8 @@ class ClinicalTrialsGovDumper(HTTPDumper):
 
     def download(self, remoteurl, localfile, headers={}):
         self.prepare_local_folders(localfile)
+
+        total_studies = self.get_total_studies()
 
         aggregated_studies = []
         next_page = None
