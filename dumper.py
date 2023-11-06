@@ -3,6 +3,8 @@ import time
 import requests
 from math import ceil
 
+from config import DATA_ARCHIVE_ROOT
+
 from biothings.hub.dataload.dumper import HTTPDumper
 
 class ClinicalTrialsGovDumper(HTTPDumper):
