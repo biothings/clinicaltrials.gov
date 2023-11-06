@@ -1,90 +1,67 @@
 import os
 import time
+import requests
 from math import ceil
 
-import requests
-from biothings.hub.dataload.dumper import APIDumper
-from config import DATA_ARCHIVE_ROOT
+from biothings.hub.dataload.dumper import HTTPDumper
 
-try:
-    from biothings import config
-
-    logger = config.logger
-except ImportError:
-    import logging
-
-    logger = logging.getLogger(__name__)
-
-
-__all__ = [
-    "ClinicalTrialsGovDumper",
-]
-
-
-class ClinicalTrialsGovDumper(APIDumper):
+class ClinicalTrialsDumper(HTTPDumper):
     SRC_NAME = "clinicaltrials_gov"
     SRC_ROOT_FOLDER = os.path.join(DATA_ARCHIVE_ROOT, SRC_NAME)
+    BASE_URL = "https://clinicaltrials.gov/api/v2/studies"
+    SCHEDULE = "0 6 * * *"
+    PAGE_SIZE = 1000  # Number of studies to request per page
+    REQUEST_DELAY = 1 / 3  # Request delay to stay within API rate limits
 
-    @staticmethod
-    def get_release():
-        resp = requests.get("https://clinicaltrials.gov/api/v2/version").json()
-        # Removes time of day from UTC timestamp
-        release = resp["dataTimestamp"].split("T")[0]
-        return release
+    def get_total_studies(self):
+        size = requests.get("https://clinicaltrials.gov/api/v2/stats/size")
+        total_studies = size.json()["totalStudies"]
+        return total_studies
 
-    @staticmethod
-    def get_document():
-        for document in _load_studies():
-            yield "clinicaltrials_gov.ndjson", document
+    def create_todump_list(self, force=False):
+        total_studies = self.get_total_studies()
+        self.release = str(total_studies)  # Use total studies as the release version
 
+        if force or not self.current_release or int(self.release) > int(self.current_release):
+            self.to_dump.append({
+                "remote": self.BASE_URL,
+                "local": os.path.join(self.new_data_folder, "clinicaltrials_gov.json")
+            })
 
-def _get_total_studies():
-    """
-    Requests the Clinical Trials API to return the total number of studies
+    def download(self, remoteurl, localfile, headers={}):
+        self.prepare_local_folders(localfile)
 
-    Returns:
-            total_studies: the total number of studies in the database
-    """
+        aggregated_studies = []
+        next_page = None
 
-    size = requests.get("https://clinicaltrials.gov/api/v2/stats/size")
-    total_studies = size.json()["totalStudies"]
+        for page in range(ceil(total_studies / self.PAGE_SIZE)):
+            payload = {
+                "format": "json",
+                "pageSize": str(self.PAGE_SIZE),
+                "pageToken": str(next_page) if next_page else None
+            }
+            data = requests.get(remoteurl, params=payload, headers=headers)
+            studies = data.json()
 
-    return total_studies
+            aggregated_studies.extend(studies["studies"])
 
+            if "nextPageToken" not in studies:
+                break
 
-def _load_studies():
-    """
-    Queries the Clinical Trials API for all the studies in the db
+            next_page = studies["nextPageToken"]
 
-    Returns:
-            aggregated_studies: a list of all the studies aggregated into a single collection
-    """
+            time.sleep(self.REQUEST_DELAY)
 
-    total_studies = _get_total_studies()
+        with open(localfile, "w") as fout:
+            json.dump(aggregated_studies, fout)
 
-    aggregated_studies = []
-    nextPage = None
+        return None  # Return None to indicate success
 
-    request_delay = 1 / 3  #  <= 3 Requests per second
+    def remote_is_better(self, remotefile, localfile):
+        """
+        Determine if remote is better
 
-    for doc_idx in range(ceil(total_studies / 1000)):
-        logger.debug(f'Processing document #{doc_idx + 1}')
-        payload = (
-            {"format": "json", "pageSize": "1000", "pageToken": f"{nextPage}"}
-            if nextPage
-            else {"format": "json", "pageSize": "1000"}
-        )
-        data = requests.get("https://clinicaltrials.gov/api/v2/studies", params=payload)
-        studies = data.json()
-
-        aggregated_studies.extend(studies["studies"])
-
-        # The last page does not have a nextPageToken field
-        if "nextPageToken" not in studies:
-            break
-
-        nextPage = studies["nextPageToken"]
-
-        time.sleep(request_delay)
-
-    return aggregated_studies
+        Override if necessary.
+        """
+        # Always redownload the data since the release is the total number of studies
+        return True
