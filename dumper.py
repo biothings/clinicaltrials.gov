@@ -23,6 +23,8 @@ class ClinicalTrialsGovDumper(HTTPDumper):
     PAGE_SIZE = 1000  # Number of studies to request per page
     REQUEST_DELAY = 1 / 3  # Request delay to stay within API rate limits
 
+    MAX_PARALLEL_DUMP = 1
+
     def get_total_studies(self):
         size = requests.get("https://clinicaltrials.gov/api/v2/stats/size")
         total_studies = size.json()["totalStudies"]
