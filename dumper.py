@@ -23,7 +23,7 @@ class ClinicalTrialsGovDumper(HTTPDumper):
     PAGE_SIZE = 1000  # Number of studies to request per page
     REQUEST_DELAY = 1 / 3  # Request delay to stay within API rate limits
 
-    MAX_PARALLEL_DUMP = 1
+    SLEEP_BETWEEN_DOWNLOAD = 0.33
 
     def get_total_studies(self):
         size = requests.get("https://clinicaltrials.gov/api/v2/stats/size")
@@ -52,7 +52,7 @@ class ClinicalTrialsGovDumper(HTTPDumper):
 
         self.logger.info("Now generating download URLs")
         for id in ids:
-            remote_file = self.API_PAGE + "/%s" %str(id)
+            remote_file = self.API_PAGE + "/%s" % str(id)
             local_file = os.path.join(self.new_data_folder,"%s.json" % id)
             self.to_dump.append({"remote":remote_file,"local":local_file})         
 
