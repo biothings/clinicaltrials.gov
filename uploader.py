@@ -6,6 +6,7 @@ import biothings, config
 biothings.config_for_app(config)
 
 import biothings.hub.dataload.uploader
+from .parse import load_data
 
 
 class ClinicalTrialsGovUploader(biothings.hub.dataload.uploader.BaseSourceUploader):
@@ -21,10 +22,5 @@ class ClinicalTrialsGovUploader(biothings.hub.dataload.uploader.BaseSourceUpload
     storage_class = biothings.hub.dataload.storage.IgnoreDuplicatedStorage
 
     def load_data(self, data_folder):
-        self.logger.info("Load data from directory: '%s'" % data_folder)
-        infile = os.path.join(data_folder, "clinical_trials.json")  # Corrected file name
-        assert os.path.exists(infile)
-        with open(infile, "r") as f:
-            data = json.load(f)  # Read the entire JSON file as a list
-            for entry in data:
-                yield entry
+        self.logger.info("Loading data from directory: '%s'" % data_folder)
+        return load_data(data_folder)
