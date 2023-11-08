@@ -21,7 +21,6 @@ class ClinicalTrialsGovDumper(HTTPDumper):
     SRC_ROOT_FOLDER = os.path.join(DATA_ARCHIVE_ROOT, SRC_NAME)
     API_PAGE = "https://clinicaltrials.gov/api/v2/studies"
     PAGE_SIZE = 1000  # Number of studies to request per page
-    REQUEST_DELAY = 1 / 3  # Request delay to stay within API rate limits
 
     SLEEP_BETWEEN_DOWNLOAD = 0.33
 
@@ -38,23 +37,34 @@ class ClinicalTrialsGovDumper(HTTPDumper):
         total_pages = ceil(self.get_total_studies() / 1000)
 
         ids = []
+        pageTokens = []
         nextPage = None
         for p in range(1, total_pages + 1):
             self.logger.info(f"Handling page# {p} / {total_pages}")
-            if nextPage is not None:
+            if nextPage:
                 doc = self.client.get(self.API_PAGE + "?fields=NCTId&pageSize=1000&pageToken=%s" % nextPage).json()
             else:
                 doc = self.client.get(self.API_PAGE + "?fields=NCTId&pageSize=1000").json()
+
+            if 'nextPageToken' in doc:
                 nextPage = doc['nextPageToken']
+                pageTokens.append(nextPage)
             
-            for study in doc['studies']:
-                ids.append(study['protocolSection']['identificationModule']['nctId']) 
+            # for study in doc['studies']:
+            #     ids.append(study['protocolSection']['identificationModule']['nctId'])
 
         self.logger.info("Now generating download URLs")
-        for id in ids:
-            remote_file = self.API_PAGE + "/%s" % str(id)
-            local_file = os.path.join(self.new_data_folder,"%s.json" % id)
-            self.to_dump.append({"remote":remote_file,"local":local_file})         
+        # for id in ids:
+        #     remote_file = self.API_PAGE + "/%s" % str(id)
+        #     local_file = os.path.join(self.new_data_folder,"%s.json" % id)
+        #     self.to_dump.append({"remote":remote_file,"local":local_file})
+
+        # Add the first page to the download URLs
+        self.to_dump.append({"remote":self.API_PAGE + "?pageSize=1000","local":local_file}) 
+        for page in pageTokens:
+            remote_file = self.API_PAGE + "?pageSize=1000&pageToken=%s" % str(page)
+            local_file = os.path.join(self.new_data_folder,"%s.json" % page)
+            self.to_dump.append({"remote":remote_file,"local":local_file}) 
 
 
     # def download(self, remoteurl, localfile, headers={}):
@@ -83,8 +93,6 @@ class ClinicalTrialsGovDumper(HTTPDumper):
     #             break
 
     #         next_page = studies["nextPageToken"]
-
-    #         # time.sleep(self.REQUEST_DELAY)
 
     #     with open(localfile, "w") as fout:
     #         json.dump(aggregated_studies, fout)
