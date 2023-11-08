@@ -7,20 +7,16 @@ from config import DATA_ARCHIVE_ROOT
 
 from biothings.hub.dataload.dumper import HTTPDumper
 
-# try:
-#     from biothings import config
-#     logger = config.logger
-# except ImportError:
-#     import logging
-#     logger = logging.getLogger(__name__)
-
 
 class ClinicalTrialsGovDumper(HTTPDumper):
     SRC_NAME = "clinicaltrials_gov"
     SRC_ROOT_FOLDER = os.path.join(DATA_ARCHIVE_ROOT, SRC_NAME)
-    API_PAGE = "https://clinicaltrials.gov/api/v2/studies"
-    PAGE_SIZE = 1000  # Number of studies to request per page
 
+    API_PAGE = "https://clinicaltrials.gov/api/v2/studies"
+    # Number of studies to request per page
+    PAGE_SIZE = 1000  
+
+    # Rate limit of 3 requests per second
     SLEEP_BETWEEN_DOWNLOAD = 0.33
     MAX_PARALLEL_DUMP = 1
 
@@ -36,7 +32,6 @@ class ClinicalTrialsGovDumper(HTTPDumper):
         self.logger.info("Downloading all available trial data")
         total_pages = (self.get_total_studies() + self.PAGE_SIZE - 1) // self.PAGE_SIZE
 
-        # ids = []
         pageTokens = []
         nextPage = None
         for p in range(1, total_pages + 1):
@@ -49,16 +44,8 @@ class ClinicalTrialsGovDumper(HTTPDumper):
             if 'nextPageToken' in doc:
                 nextPage = doc['nextPageToken']
                 pageTokens.append(nextPage)
-            
-            # for study in doc['studies']:
-            #     ids.append(study['protocolSection']['identificationModule']['nctId'])
 
         self.logger.info("Now generating download URLs")
-        # for id in ids:
-        #     remote_file = self.API_PAGE + "/%s" % str(id)
-        #     local_file = os.path.join(self.new_data_folder,"%s.json" % id)
-        #     self.to_dump.append({"remote":remote_file,"local":local_file})
-
         # Add the first page to the download URLs
         self.to_dump.append({"remote":self.API_PAGE + f"?pageSize={self.PAGE_SIZE}","local":os.path.join(self.new_data_folder, "firstPage.json")}) 
         for page in pageTokens:
