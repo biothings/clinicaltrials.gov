@@ -60,7 +60,7 @@ class ClinicalTrialsGovDumper(HTTPDumper):
         #     self.to_dump.append({"remote":remote_file,"local":local_file})
 
         # Add the first page to the download URLs
-        self.to_dump.append({"remote":self.API_PAGE + "?pageSize=1000","local":local_file}) 
+        self.to_dump.append({"remote":self.API_PAGE + "?pageSize=1000","local":os.path.join(self.new_data_folder, "firstPage.json")}) 
         for page in pageTokens:
             remote_file = self.API_PAGE + "?pageSize=1000&pageToken=%s" % str(page)
             local_file = os.path.join(self.new_data_folder,"%s.json" % page)
