@@ -1,7 +1,6 @@
 import os
 import time
 import requests
-from math import ceil
 import json
 
 from config import DATA_ARCHIVE_ROOT
@@ -35,9 +34,9 @@ class ClinicalTrialsGovDumper(HTTPDumper):
         self.release = resp["dataTimestamp"].split("T")[0]
 
         self.logger.info("Downloading all available trial data")
-        total_pages = ceil(self.get_total_studies() / 1000)
+        total_pages = (self.get_total_studies() + self.PAGE_SIZE - 1) // self.PAGE_SIZE
 
-        ids = []
+        # ids = []
         pageTokens = []
         nextPage = None
         for p in range(1, total_pages + 1):
@@ -61,41 +60,8 @@ class ClinicalTrialsGovDumper(HTTPDumper):
         #     self.to_dump.append({"remote":remote_file,"local":local_file})
 
         # Add the first page to the download URLs
-        self.to_dump.append({"remote":self.API_PAGE + "?pageSize=1000","local":os.path.join(self.new_data_folder, "firstPage.json")}) 
+        self.to_dump.append({"remote":self.API_PAGE + f"?pageSize={self.PAGE_SIZE}","local":os.path.join(self.new_data_folder, "firstPage.json")}) 
         for page in pageTokens:
-            remote_file = self.API_PAGE + "?pageSize=1000&pageToken=%s" % str(page)
+            remote_file = self.API_PAGE + f"?pageSize={self.PAGE_SIZE}&pageToken={str(page)}"
             local_file = os.path.join(self.new_data_folder,"%s.json" % page)
             self.to_dump.append({"remote":remote_file,"local":local_file}) 
-
-
-    # def download(self, remoteurl, localfile, headers={}):
-    #     self.prepare_local_folders(localfile)
-
-    #     total_studies = self.get_total_studies()
-
-    #     aggregated_studies = []
-    #     next_page = None
-
-    #     for page in range(ceil(total_studies / self.PAGE_SIZE)):
-    #         logger.info(f"Handling document #{page}")
-    #         payload = {
-    #             "format": "json",
-    #             "pageSize": str(self.PAGE_SIZE),
-    #             "pageToken": str(next_page) if next_page else None
-    #         }
-            
-    #         data = requests.get(remoteurl, params=payload, headers=headers)
-                
-    #         studies = data.json()
-
-    #         aggregated_studies.extend(studies["studies"])
-
-    #         if "nextPageToken" not in studies:
-    #             break
-
-    #         next_page = studies["nextPageToken"]
-
-    #     with open(localfile, "w") as fout:
-    #         json.dump(aggregated_studies, fout)
-
-    #     return None  # Return None to indicate success
