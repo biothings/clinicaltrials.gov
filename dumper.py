@@ -18,7 +18,7 @@ class ClinicalTrialsGovDumper(HTTPDumper):
 
     # Rate limit of 3 requests per second
     SLEEP_BETWEEN_DOWNLOAD = 0.33
-    MAX_PARALLEL_DUMP = 1
+    MAX_PARALLEL_DUMP = 3
 
     def get_total_studies(self):
         size = requests.get("https://clinicaltrials.gov/api/v2/stats/size")
