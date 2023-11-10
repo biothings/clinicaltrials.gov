@@ -25,4 +25,7 @@ class ClinicalTrialsGovUploader(biothings.hub.dataload.uploader.BaseSourceUpload
         infile = os.path.join(data_folder, "clinicaltrials_gov.ndjson")
         assert os.path.exists(infile)
         with open(infile, "r") as f:
-            yield json.load(infile)
+            for line in f:
+                studies = json.loads(line)["studies"]
+                for study in studies:
+                    yield study
