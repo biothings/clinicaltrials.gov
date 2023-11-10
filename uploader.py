@@ -18,12 +18,11 @@ class ClinicalTrialsGovUploader(biothings.hub.dataload.uploader.BaseSourceUpload
     }
 
     idconverter = None
-    storage_class = biothings.hub.dataload.storage.IgnoreDuplicatedStorage
+    storage_class = biothings.utils.storage.IgnoreDuplicatedStorage
 
     def load_data(self, data_folder):
         self.logger.info("Load data from directory: '%s'" % data_folder)
         infile = os.path.join(data_folder, "clinicaltrials_gov.ndjson")
         assert os.path.exists(infile)
         with open(infile, "r") as f:
-            for line in f:
-                yield json.loads(line)
+            yield json.load(infile)

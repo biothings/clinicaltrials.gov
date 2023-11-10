@@ -55,31 +55,31 @@ def _load_studies():
             aggregated_studies: a list of all the studies aggregated into a single collection
     """
 
+    API_PAGE = "https://clinicaltrials.gov/api/v2/studies"
+    PAGE_SIZE = 1000 # Min: 0, Max: 1000
+    DOWNLOAD_DELAY = 1 / 3  #  <= 3 Requests per second
+
     total_studies = _get_total_studies()
 
     aggregated_studies = []
-    nextPage = None
+    next_page = None
 
-    request_delay = 1 / 3  #  <= 3 Requests per second
+    total_pages = (total_studies + PAGE_SIZE - 1) // PAGE_SIZE  # Calculate total pages
 
-    for doc_idx in range(ceil(total_studies / 1000)):
-        logger.debug(f'Processing document #{doc_idx + 1}')
+    for doc_idx in range(1, total_pages + 1):
+        logger.info(f'Processing page #{doc_idx + 1} / {total_pages}')
         payload = (
-            {"format": "json", "pageSize": "1000", "pageToken": f"{nextPage}"}
-            if nextPage
+            {"format": "json", "pageSize": "1000", "pageToken": f"{next_page}"}
+            if next_page
             else {"format": "json", "pageSize": "1000"}
         )
-        data = requests.get("https://clinicaltrials.gov/api/v2/studies", params=payload, timeout=5.0)
-        studies = data.json()
+        data = requests.get(API_PAGE, params=payload)
+        page = data.json()
 
-        aggregated_studies.extend(studies["studies"])
+        aggregated_studies.extend(page["studies"])
 
-        # The last page does not have a nextPageToken field
-        if "nextPageToken" not in studies:
-            break
+        next_page = page["nextPageToken"]
 
-        nextPage = studies["nextPageToken"]
-
-        time.sleep(request_delay)
+        time.sleep(DOWNLOAD_DELAY)
 
     return aggregated_studies
