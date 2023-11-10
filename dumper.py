@@ -85,6 +85,6 @@ def _load_studies():
 
         next_page = page["nextPageToken"]
 
-        time.sleep(DOWNLOAD_DELAY)
+        # time.sleep(DOWNLOAD_DELAY)
 
     return aggregated_studies
