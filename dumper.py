@@ -61,7 +61,7 @@ def _load_studies():
 
     total_studies = _get_total_studies()
 
-    aggregated_studies = []
+    # aggregated_studies = []
     next_page = None
 
     total_pages = (total_studies + PAGE_SIZE - 1) // PAGE_SIZE  # Calculate total pages
@@ -81,10 +81,12 @@ def _load_studies():
                 "Failed retries. Document failed to be retreived."
         page = data.json()
 
-        aggregated_studies.extend(page["studies"])
+        # aggregated_studies.extend(page["studies"])
 
         next_page = page["nextPageToken"]
 
+        yield page
+
         # time.sleep(DOWNLOAD_DELAY)
 
-    return aggregated_studies
+    # return aggregated_studies
