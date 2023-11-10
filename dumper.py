@@ -66,24 +66,20 @@ def _load_studies():
 
     total_pages = (total_studies + PAGE_SIZE - 1) // PAGE_SIZE  # Calculate total pages
 
-    for doc_idx in range(1, total_pages + 1):
-        logger.info(f'Processing page #{doc_idx + 1} / {total_pages}')
+    for page_idx in range(1, total_pages + 1):
+        logger.info(f'Processing page #{page_idx} / {total_pages}')
         payload = (
             {"format": "json", "pageSize": "1000", "pageToken": f"{next_page}"}
             if next_page
             else {"format": "json", "pageSize": "1000"}
         )
-        for _ in range(3):
-            try:
-                data = requests.get(API_PAGE, params=payload, timeout=60.0)
-                break
-            except:
-                "Failed retries. Document failed to be retreived."
+        data = requests.get(API_PAGE, params=payload, timeout=60.0)
         page = data.json()
 
         # aggregated_studies.extend(page["studies"])
 
-        next_page = page["nextPageToken"]
+        if 'nextPageToken' in page:
+            nextPage = page['nextPageToken']
 
         yield page
 
