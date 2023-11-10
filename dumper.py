@@ -73,7 +73,7 @@ def _load_studies():
             if next_page
             else {"format": "json", "pageSize": "1000"}
         )
-        data = requests.get(API_PAGE, params=payload)
+        data = requests.get(API_PAGE, params=payload, timeout=60.0)
         page = data.json()
 
         aggregated_studies.extend(page["studies"])
