@@ -73,7 +73,12 @@ def _load_studies():
             if next_page
             else {"format": "json", "pageSize": "1000"}
         )
-        data = requests.get(API_PAGE, params=payload, timeout=60.0)
+        for _ in range(3):
+            try:
+                data = requests.get(API_PAGE, params=payload, timeout=60.0)
+                break
+            except:
+                "Failed retries. Document failed to be retreived."
         page = data.json()
 
         aggregated_studies.extend(page["studies"])
