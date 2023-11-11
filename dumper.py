@@ -79,7 +79,7 @@ def _load_studies():
         # aggregated_studies.extend(page["studies"])
 
         if 'nextPageToken' in page:
-            nextPage = page['nextPageToken']
+            next_page = page['nextPageToken']
 
         yield page
 
