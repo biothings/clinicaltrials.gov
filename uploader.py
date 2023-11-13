@@ -28,4 +28,5 @@ class ClinicalTrialsGovUploader(biothings.hub.dataload.uploader.BaseSourceUpload
             for line in f:
                 studies = json.loads(line.strip())["studies"]
                 for study in studies:
+                    study["_id"] = study['protocolSection']['identificationModule']['nctId']
                     yield study
