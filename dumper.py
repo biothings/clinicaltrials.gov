@@ -29,8 +29,8 @@ class ClinicalTrialsGovDumper(APIDumper):
 
     @staticmethod
     def get_document():
-        for document in _load_studies():
-            yield "clinicaltrials_gov.ndjson", document
+        for document, page_idx in _load_studies():
+            yield f"{page_idx}.ndjson", document
 
 
 def _get_total_studies():
@@ -61,7 +61,6 @@ def _load_studies():
 
     total_studies = _get_total_studies()
 
-    # aggregated_studies = []
     next_page = None
 
     total_pages = (total_studies + PAGE_SIZE - 1) // PAGE_SIZE  # Calculate total pages
@@ -76,13 +75,9 @@ def _load_studies():
         data = requests.get(API_PAGE, params=payload, timeout=60.0)
         page = data.json()
 
-        # aggregated_studies.extend(page["studies"])
-
         if 'nextPageToken' in page:
             next_page = page['nextPageToken']
-
-        yield page
+        
+        yield page, page_idx
 
         # time.sleep(DOWNLOAD_DELAY)
-
-    # return aggregated_studies

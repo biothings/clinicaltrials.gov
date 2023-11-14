@@ -1,12 +1,13 @@
 import os
+import glob
 import json
 
+from .parse import load_data_file
+
 import biothings, config
-
-biothings.config_for_app(config)
-
 import biothings.hub.dataload.uploader
 
+biothings.config_for_app(config)
 
 class ClinicalTrialsGovUploader(biothings.hub.dataload.uploader.ParallelizedSourceUploader):
     name = "clinicaltrials_gov"
@@ -17,20 +18,13 @@ class ClinicalTrialsGovUploader(biothings.hub.dataload.uploader.ParallelizedSour
         }
     }
 
-
     def jobs(self):
-        infile = os.path.join(self.data_folder, "clinicaltrials_gov.ndjson")
-        with open(infile, 'r') as file:
-            documents = file.readlines()
-        return [(d, ) for d in documents]
+        files = glob.glob(os.path.join(self.data_folder, "*.ndjson"))
+        return [(f, ) for f in files]
 
-
-
-    def load_data(self, input_line):
-        studies = json.loads(input_line.strip())["studies"]
-        for study in studies:
-            study["_id"] = study['protocolSection']['identificationModule']['nctId']
-            yield study
+    def load_data(self, input_file):
+        self.logger.info("Processing data from %s" % input_file)
+        return load_data_file(input_file)
     
 
     @classmethod
