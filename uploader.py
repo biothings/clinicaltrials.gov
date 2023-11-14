@@ -8,7 +8,7 @@ biothings.config_for_app(config)
 import biothings.hub.dataload.uploader
 
 
-class ClinicalTrialsGovUploader(biothings.hub.dataload.uploader.BaseSourceUploader):
+class ClinicalTrialsGovUploader(biothings.hub.dataload.uploader.ParallelizedSourceUploader):
     name = "clinicaltrials_gov"
     __metadata__ = {
         "src_meta": {
@@ -17,19 +17,19 @@ class ClinicalTrialsGovUploader(biothings.hub.dataload.uploader.BaseSourceUpload
         }
     }
 
-    idconverter = None
-    storage_class = biothings.utils.storage.IgnoreDuplicatedStorage
 
-    def load_data(self, data_folder):
-        self.logger.info("Load data from directory: '%s'" % data_folder)
-        infile = os.path.join(data_folder, "clinicaltrials_gov.ndjson")
-        assert os.path.exists(infile)
-        with open(infile, "r") as f:
-            for line in f:
-                studies = json.loads(line.strip())["studies"]
-                for study in studies:
-                    study["_id"] = study['protocolSection']['identificationModule']['nctId']
-                    yield study
+    def jobs(self):
+        with open('your_file.txt', 'r') as file:
+            documents = file.readlines()
+        return [(d, ) for d in documents]
+
+
+
+    def load_data(self, input_line):
+        studies = json.loads(input_line.strip())["studies"]
+        for study in studies:
+            study["_id"] = study['protocolSection']['identificationModule']['nctId']
+            yield study
     
 
     @classmethod
