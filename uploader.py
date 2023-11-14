@@ -19,7 +19,8 @@ class ClinicalTrialsGovUploader(biothings.hub.dataload.uploader.ParallelizedSour
 
 
     def jobs(self):
-        with open('clinicaltrials_gov.ndjson', 'r') as file:
+        infile = os.path.join(self.data_folder, "clinicaltrials_gov.ndjson")
+        with open(infile, 'r') as file:
             documents = file.readlines()
         return [(d, ) for d in documents]
 
